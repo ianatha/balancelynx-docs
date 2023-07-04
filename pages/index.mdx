@@ -1,0 +1,38 @@
+## Overview
+
+Balancelynx is a high-performing, programmable, double-entry bookkeeping ledger offered over
+a developer-friendly REST API.
+
+## Feature Highlights
+
+### Flexible Account Hierarchy
+Balancelynx redefines the traditional hierarchy of a *Chart of Accounts*. Instead of
+a limiting parent-child relationship, AccountGroups group Accounts and other
+AccountGroups together.
+
+### User-Defined Functions
+Accounts and AccountGroups can perform checks on Transactions involving them through
+Javascript User-Defined Functions (UDFs). UDFs allow flexible customization of account
+behaviors suiting a wide range of unique business needs.
+
+### Opt-In Immutability
+Depending on your needs, you can configure a Balancelynx ledger to be immutable, or
+not.
+
+### Multi-Commodity Support
+Balancelynx allows you keep track of anything you can count, from US Dollars, to Billable
+Hours, and from Tradable Commodities to Inventory Items.
+
+### Indexable Metadata (on the roadmap)
+All Balancelynx objects permit user-defined metadata field, represented as a simple JSON
+object. You can define indices on keys contained in metadata, allowing you to rapidly
+retrieve them.
+
+## Roadmap
+Our roadmap includes the following features:
+* GraphQL
+* Indexable Metadata
+* Bi-directional interoperability with `ledger-cli` files.
+* Webhooks
+* Integrated bi-directional syncing with banking providers
+* gRPC

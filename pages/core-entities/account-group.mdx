@@ -1,0 +1,124 @@
+## AccountGroup
+
+An `AccountGroup` groups `Accounts` together, and can optionally impose [Account Behaviors](account-behaviors).
+An `AccountGroup` can include other `AccountGroups`.
+
+Optionally, each member [Account](account) of an `AccountGroup` can have a `code`, which can be used
+when rendering a [Transaction](transaction) via [Vouchers](voucher).
+
+	> TODO: Balance Roolup invert sign
+
+For example, you could have an `AccountGroup` for each **User** on your platform:
+```json filename="/acctgrp/acctgrp_beefca01"
+{
+	"id": "acctgrp_beefca01",
+	"silo_id": "silo_beefca00",
+	"metadata": {
+		"platfrom_user_id": 1
+	},
+	"members": [{
+		"code": "INVESTMENTS",
+		"account_id": "acct_beefca02"
+	}, {
+		"code": "CASH",
+		"account_id": "acct_beefca03"
+	}, {
+		"code": "EXTERNAL_CHECKING",
+		"account_id": "acct_beefca04"
+	}, {
+		"account_id": "acct_beefcaff"
+	}]
+}
+```
+
+Then, you could have the following Vouchers:
+```json filename="/ledger/silo_beefca00/vouchers"
+[{
+	"id": "voucher_00001",
+	"code": "DEPOSIT",
+	"params": [{
+		"name": "user_acctgrp",
+		"type": "acctgrp"
+	}, {
+		"name": "amount",
+		"type": "number"
+	}],
+	"transactions": [{
+		"postings": [{
+			"acct": "params.user_acctgrp.EXTERNAL_CHECKING",
+			"debit": "params.amount",
+			"commodity": "'cmm_USD'"
+		}, {
+			"acct": "params.user_acctgrp.CASH",
+			"credit": "params.amount",
+			"commodity": "'cmm_USD'"
+		}]
+	}]
+}, {
+	"id": "voucher_00002",
+	"code": "PURCHASE",
+	"params": [{
+		"name": "user_acctgrp",
+		"type": "acctgrp"
+	}, {
+		"name": "amount",
+		"type": "number"
+	}, {
+		"name": "ticker",
+		"type": "commodity"
+	}, {
+		"name": "price_per_stock",
+		"type": "number"
+	}],
+	"transactions": [{
+		postings: [{
+			"acct": "params.user_acctgrp.CASH",
+			"debit": "params.amount * params.price_per_stock",
+			"commodity": "'cmm_USD'"
+		}, {
+			"acct": "params.user_acctgrp.INVESTMENTS",
+			"credit": "params.amount",
+			"commodity": "params.ticker"
+		}]
+	}]
+}]
+```
+
+Then, in your backend you would have the following functions to implement the business
+logic for *deposits* and *stock purchases*:
+
+```typescript
+async function deposit(user_id: string, amount: number) {
+	const user_acctgrp = database.getUser(user_id).fineng_acctgrp_id;
+	return await fineng.postVoucher({
+		code: "DEPOSIT",
+		params: {
+			user_acctgrp,
+			amount: amount * 100,
+		},
+	});
+}
+```
+
+```typescript
+async function purchase_stock(user_id: string, ticker: string, amount: number) {
+	const currentPrice = market.getPriceForTicker(ticker);
+	const totalCost = amount * currentPrice;
+	const user_acctgrp = database.getUser(user_id).fineng_acctgrp_id;
+	const cash_account = fineng.resolveAccountGroupMember(user_acctgrp, "CASH");
+	const usd_balance = cash_account.balance.normalize("USD");
+	if (usd_balance < totalCost) {
+		throw new Error("insufficient balance, you need ${totalCost} but you only have ${usd_balance}");
+	}
+	return await fineng.postVoucher({
+		code: "PURCHASE",
+		params: {
+			user_acctgrp,
+			amount: amount * 100,
+			ticker,
+			price_per_stock: currentPrice * 100.
+		},
+	});
+}
+```
+

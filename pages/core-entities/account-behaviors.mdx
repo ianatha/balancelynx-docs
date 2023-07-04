@@ -1,0 +1,67 @@
+# Account Behaviors with UDFs
+
+Account Behaviors validate Transactions about to be posted to an Account.
+
+You can use Balancelynx's Predefined Account Behaviors, or define your own using TypeScript.
+Your JavaScript code runs in an isolated Javascript sandbox within Balancelynx.
+
+## Predefined Account Behaviors
+
+Balancelynx ships with some pre-defined Account Behaviors that you can reference by name:
+* `only_debits`
+* `only_credits`
+* `only_positive_amounts`
+* `must_positive_balance`
+* `must_negative_balance`
+* `no_transactions`
+
+## User-Defined Functions
+
+A User-Defined Function defining an Account Behavior must have the following signature:
+```typescript
+type AccountBehaviorFunction = (acct: any, tx: any, posting: any) => Promise<true|string>;
+```
+
+For example, to require that all postings to an account have a `correlation_id` in their
+metadata, you could define an Account Behavior as follows:
+
+```typescript copy
+import { AccountBehaviorFunction } from "fineng";
+
+const requireCorrelationId: AccountBehaviorFunction = (acct, tx, posting) => {
+	if (!posting.metadata?.correlation_id) {
+		return `${acct.id} requires that all postings contain a correlation_id`;
+	}
+	return true;
+}
+```
+
+This will result to `requireCorrelationId.toString()` looking something:
+```
+"(acct, tx, posting)=>{\n    if (!posting.metadata?.correlation_id) {\n        return `${acct.id} requires that all postings contain a correlation_id`;\n    }\n    return true;\n}"
+```
+
+Then, you could update an existing account to execute that Account Behavior prior to accepting any [Transactions](transaction).
+```typescript copy
+updateAccount({
+	// ...
+	behaviors: [{
+		"type": "function/v0",
+		"src": requireCorrelationId.toString(),
+	}, {
+		"type": "predefined",
+		"name": "only_debits"
+	}],
+});
+```
+
+You could also impose an Account Behavior to an [Account Group](account-group):
+```typescript copy
+updateAccountGroup({
+	// ...
+	behaviors: [{
+		"type": "function/v0",
+		"src": requireCorrelationId.toString(),
+	}],
+});
+```

@@ -1,0 +1,22 @@
+## Core Objects
+
+Balancelynx revolves around `Commodities` being moved between `Accounts` via `Transactions`.
+`Accounts` are grouped together in `AccountGroups`. Optionally, you can use `Vouchers`
+to codify a mapping between your business logic and Balancelynx `Transactions`.
+
+Before a `Transaction` is posted, it must satisfy the requirements posed by the
+User-Defined Functions (UDFs) of all involved `Accounts` and `AccountGroups`.
+
+Lastly, a `Silo` is a ledger, containing all other objects.
+
+```mermaid
+erDiagram
+    Silo one -- zero or more Account : ""
+    Silo one -- zero or more AccountGroup : ""
+        AccountGroup one or more .. one or more Account : ""
+    Silo one -- one or more Commodity : ""
+    Silo one -- zero or more Transaction : ""
+        Transaction one or more .. one or more Account : ""
+        Transaction one or more .. one or more Commodity : ""
+    Silo one -- zero or more Voucher : ""
+```

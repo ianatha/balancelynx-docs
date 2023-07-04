@@ -1,0 +1,92 @@
+import { Callout } from 'nextra/components'
+
+## Transactions
+
+*Transactions* move amounts of [Commodities](commodity) between [Accounts](account).
+
+## Postings
+
+The amount to be credited, or debited, to each [Account](account) is indicated in a *Posting*. All
+transactions must balance, which means that the total amount credited must equal to the
+total amount debited. Since a Posting can either debit or credit, a Transaction needs at
+least two *Postings* to balance.
+
+## Sample Transaction
+The Javascript representation of an example transaction is:
+```typescript
+const transaction = {
+	postings: [
+		// withdrew $1000.49 from my Checking account
+		{ account: acct_Checking, debit: 1000_49, commodity: USD },
+		// and paid $1000.00 towards Rent
+		{ account: acct_Expenses_Rent, credit: 1000_00, commodity: USD },
+		// and $0.49 for banking fees
+		{ account: acct_Expenses_BankFees, credit: 49, commodity: USD },
+	],
+};
+```
+
+## Distinguishing between Credits and Debits
+Postings explicitly separate credit movements of Commodities from debit movements.
+While some ledger software presumes that a negative amount is a debit, and a
+positive amount is a credit, we distinguish between them. This permits you to
+represent a greater variety of real-world situations, while keeping reporting
+straightforward. For example, by representing reversal transactions in an
+Account representing a Credit Card as negative debits, but earned rewards as
+positive credits, we can easily determine the total expenses (the sum of all debits)
+without any ad hoc logic to exclude earned rewards.
+
+Consider the following scenario, where a $10 charge gets posted against an account representing a credit card:
+```typescript
+const original = postTransaction({
+	postings: [
+		{ account: expenses_misc, credit: 100, commodity: USD },
+		{ account: credit_crd, debit: 100, commodity: USD },
+	]
+})
+```
+
+Assuming that we later on need to void that $10 charge and make it as if it never happened, while keeping our ledger immutable.
+This means that no records should be erased, but the $10 charge shouldn't appear in any reporting whatsover. We'd issue:
+```typescript
+const reversal = postTransaction({
+	postings: [
+		{ account: expenses_misc, credit: -100, commodity: USD },
+		{ account: credit_crd, debit: -100, commodity: USD },
+	],
+})
+```
+
+This way, the **debits balance** will be whatever it was before the original transcation.
+
+## Transactions with Multiple Commodities
+TODO
+
+## Rejected Transactions
+A transaction can be rejected when it doesn't pass the checks imposed by the Behaviors of all involved Accounts and AccountGroups.
+
+For example the following code,
+```typescript
+const expense_accounts = createAccountGroup({
+	accounts: [
+		acct_Expenses_Rent,
+		acct_Expenses_BankFees,
+	],
+	behaviors: [
+		// TODO
+	],
+});
+
+const reversal = postTransaction({
+	postings: [
+		{ account: expenses_misc, credit: -100, commodity: USD },
+		{ account: credit_crd, debit: -100, commodity: USD },
+	],
+});
+```
+will result to a `RejectedTransactionException` containing the following information:
+```json
+{
+	"asdf": "Asdf"
+}
+```

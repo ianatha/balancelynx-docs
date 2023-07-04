@@ -1,0 +1,39 @@
+## First Example
+
+Using these primitives, let's configure a ledger to keep tracking of a checking account.
+
+```typescript
+const ledger = createLedger({
+	baseCommodityCode: "USD",
+});
+
+const USD = ledger.getCommodity({
+	code: "USD",
+});
+
+const openingBalance = ledger.createAccount();
+const checking = ledger.createAccount();
+
+const firstTransaction = ledger.postTransaction({
+	postings: [
+		{ account: checking, credit: 100, commodity: USD },
+		{ account: openingBalance, debit: 100, commodity: USD },
+	],
+});
+
+
+assert(checking.getBalance(), {
+	debit: {
+		USD: 100,
+	},
+	credit: {
+		USD: 0,
+	},
+});
+
+assert(checking.getBalance().toNormalized(), {
+	USD: 100,
+});
+
+assert(checking.getBalance().toNormalized().toCommodity(USD), 100);
+```
