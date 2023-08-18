@@ -5,7 +5,7 @@
 title: All Objects
 ---
 erDiagram
-	Silo {
+	Ledger {
         JSON metadata
 	}
 	Account {
@@ -36,14 +36,14 @@ erDiagram
         number debit
         time effective_at
     }
-    Silo one -- zero or more Account : ""
+    Ledger one -- zero or more Account : ""
         Account one -- zero or more Balance : ""
         Account one .. zero or more Posting : ""
-    Silo one -- zero or more AccountGroup : ""
+    Ledger one -- zero or more AccountGroup : ""
         AccountGroup one or more .. one or more Account : ""
-    Silo one -- one or more Commodity : ""
+    Ledger one -- one or more Commodity : ""
         Commodity ||--|{ Price : ""
-    Silo one -- zero or more Transaction : ""
+    Ledger one -- zero or more Transaction : ""
         Transaction one .. one or more Posting : ""
-    Silo one -- zero or more Voucher : ""
+    Ledger one -- zero or more Voucher : ""
 ```
