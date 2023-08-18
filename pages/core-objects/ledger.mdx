@@ -1,4 +1,11 @@
 ## Ledger
-A ledger is completely isolated from any other ledger. Commodoties are different,
-commodity prices are different, and you can't move commodities between accounts on
-different ledgers. Generally, you would have one ledger for your system.
+A ledger is completely isolated from any other ledger.
+
+You can't move commodities between accounts on different ledgers.
+
+For example, if your usecase is an expense reporting SaaS, you would generally
+have a `Ledger` per business, and a `Ledger` per individual user.
+
+That would allow you to sync each individual user's personal credit cards into
+a separate `Ledger`, and to track pending and remitted expense reports in
+the business's `Ledger`.

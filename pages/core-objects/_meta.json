@@ -1,6 +1,6 @@
 {
 	"ledger": "Ledger",
 	"account": "Account",
-	"account-behaviors": "Account Behaviors with UDFs",
+	"account-behaviors": "Account Behaviors",
 	"account-group": "AccountGroup"
 }
